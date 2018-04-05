@@ -1,4 +1,7 @@
 local composer = require( "composer" )
+local widget = require( "widget" )
+
+widget.setTheme( "widget_theme_ios7" )
  
 local scene = composer.newScene()
  
@@ -6,9 +9,22 @@ local scene = composer.newScene()
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
 -- -----------------------------------------------------------------------------------
+ local w = display.actualContentWidth
+ local h = display.actualContentHeight
  
- 
- 
+ local function handleButtonEvent( event ) 
+    if (event.phase == "ended") then
+        if (event.target.id == "emailpassword") then
+
+        elseif (event.target.id == "facebook") then
+
+        elseif (event.target.id == "google") then
+
+        end
+        print(event.target.id .. " button pressed")
+    end
+ end
+
  
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
@@ -31,9 +47,56 @@ function scene:show( event )
  
     if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
+        -- ex: before the scene transition begins
+
+        local numOfButtons = 3
+        local buttonW = w / 2
+        local buttonH = buttonW / 4
+        local buttonFontSize = buttonH / 2
+        local buttonCornerRadius = buttonH / 3
+
+        local button1 = widget.newButton({
+            id = "emailpassword",
+            x = w / 2,
+            y = h / (numOfButtons + 1),
+            width = buttonW,
+            height = buttonH,
+            label = "Email/Password",
+            fontSize = buttonFontSize,
+            shape = "roundedRect",
+            cornerRadius = buttonCornerRadius,
+            onEvent = handleButtonEvent,
+        })
+
+        local button2 = widget.newButton({
+            id = "facebook",
+            x = w / 2,
+            y = 2 * button1.y,
+            width = buttonW,
+            height = buttonH,
+            label = "Facebook",
+            fontSize = buttonFontSize,
+            shape = "roundedRect",
+            cornerRadius = buttonCornerRadius,
+            onEvent = handleButtonEvent,
+        })
+
+        local button3 = widget.newButton({
+            id = "google",
+            x = w / 2,
+            y = 3 * button1.y,
+            width = buttonW,
+            height = buttonH,
+            label = "Google",
+            fontSize = buttonFontSize,
+            shape = "roundedRect",
+            cornerRadius = buttonCornerRadius,
+            onEvent = handleButtonEvent,
+        })
  
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
+        -- ex: after the scene transition completes
  
     end
 end

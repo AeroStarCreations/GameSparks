@@ -31,9 +31,11 @@ function scene:show( event )
  
     if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
+        -- ex: before the scene transition begins
  
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
+        -- ex: after the scene transition completes
  
     end
 end
