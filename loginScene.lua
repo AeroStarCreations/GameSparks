@@ -1,5 +1,7 @@
 local composer = require( "composer" )
 local widget = require( "widget" )
+
+widget.setTheme( "widget_theme_ios7" )
  
 local scene = composer.newScene()
  
@@ -13,7 +15,7 @@ local h = display.actualContentHeight
 local function handleButtonEvent( event ) 
     if (event.phase == "ended") then
         if (event.target.id == "emailpassword") then
-
+            composer.gotoScene( "usernameLoginScene" )
         elseif (event.target.id == "facebook") then
 
         elseif (event.target.id == "google") then
