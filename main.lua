@@ -9,4 +9,4 @@ local  composer = require("composer")
 
 composer.isDebug = true
 
-composer.gotoScene( "loginScene" )
+composer.gotoScene( "loginOrRegisterScene" )

@@ -42,7 +42,20 @@ settings =
 	--
 	plugins =
 	{
-
+		["plugin.bit"] =
+      {
+          publisherId = "com.coronalabs",
+          supportedPlatforms = { iphone=true, android=true, }
+      },
+      ["plugin.openssl"] =
+      {
+          publisherId = "com.coronalabs",
+          supportedPlatforms = { iphone=true, android=true, }
+      },
+      ["plugin.gamesparks"] =
+      {
+        publisherId = "com.gamesparks",
+      },
 	},
 
 	--

@@ -1,5 +1,8 @@
 local composer = require( "composer" )
 local widget = require( "widget" )
+local GS = require( "plugin.gamesparks" )
+
+widget.setTheme( "widget_theme_ios7" )
  
 local scene = composer.newScene()
  
@@ -9,22 +12,31 @@ local scene = composer.newScene()
 -- -----------------------------------------------------------------------------------
 local w = display.actualContentWidth
 local h = display.actualContentHeight
+local gs
 
 local function handleButtonEvent( event ) 
     if (event.phase == "ended") then
-        if (event.target.id == "emailpassword") then
-
-        elseif (event.target.id == "facebook") then
-
-        elseif (event.target.id == "google") then
-
-        elseif (event.target.id == "back") then
-            composer.gotoScene( composer.getSceneName( "previous" ))
+        if (event.target.id == "login") then
+            composer.gotoScene( "loginScene" )
+        elseif (event.target.id == "register") then
+            composer.gotoScene( "registerScene" )
         end
         print(event.target.id .. " button pressed")
     end
 end
 
+local function writeText( string ) 
+    print( string )
+end
+
+local function availabilityCallback( isAvailable ) 
+    writeText( "Availability: " .. tostring(isAvailable) .. "\n")
+
+    if isAvailable then
+    -- Do something
+    end
+end
+ 
  
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
@@ -35,6 +47,13 @@ function scene:create( event )
  
     local sceneGroup = self.view
     -- Code here runs when the scene is first created but has not yet appeared on screen
+    gs = createGS()
+    gs.setLogger( writeText )
+    gs.setApiKey( "x351935KVecu" )
+    gs.setApiSecret( "RSMked0zUwwKqS0baxkktSpt9mNoDN1j" )
+    gs.setApiCredential( "device" )
+    gs.setAvailabilityCallback( availabilityCallback )
+    gs.connect()
 
 end
  
@@ -48,20 +67,19 @@ function scene:show( event )
     if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
         -- ex: before the scene transition begins
-
-        local numOfButtons = 4
+        local numOfButtons = 2
         local buttonW = w / 2
         local buttonH = buttonW / 4
         local buttonFontSize = buttonH / 2
         local buttonCornerRadius = buttonH / 3
 
         local button1 = widget.newButton({
-            id = "emailpassword",
+            id = "login",
             x = w / 2,
             y = h / (numOfButtons + 1),
             width = buttonW,
             height = buttonH,
-            label = "Email/Password",
+            label = "Log In",
             fontSize = buttonFontSize,
             shape = "roundedRect",
             cornerRadius = buttonCornerRadius,
@@ -69,38 +87,12 @@ function scene:show( event )
         })
 
         local button2 = widget.newButton({
-            id = "facebook",
+            id = "register",
             x = w / 2,
             y = 2 * button1.y,
             width = buttonW,
             height = buttonH,
-            label = "Facebook",
-            fontSize = buttonFontSize,
-            shape = "roundedRect",
-            cornerRadius = buttonCornerRadius,
-            onEvent = handleButtonEvent,
-        })
-
-        local button3 = widget.newButton({
-            id = "google",
-            x = w / 2,
-            y = 3 * button1.y,
-            width = buttonW,
-            height = buttonH,
-            label = "Google",
-            fontSize = buttonFontSize,
-            shape = "roundedRect",
-            cornerRadius = buttonCornerRadius,
-            onEvent = handleButtonEvent,
-        })
-
-        local button4 = widget.newButton({
-            id = "back",
-            x = w / 2,
-            y = 4 * button1.y,
-            width = buttonW,
-            height = buttonH,
-            label = "Back",
+            label = "Register",
             fontSize = buttonFontSize,
             shape = "roundedRect",
             cornerRadius = buttonCornerRadius,
@@ -109,9 +101,7 @@ function scene:show( event )
 
         sceneGroup:insert( button1 )
         sceneGroup:insert( button2 )
-        sceneGroup:insert( button3 )
-        sceneGroup:insert( button4 )
- 
+
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
         -- ex: after the scene transition completes
