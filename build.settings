@@ -22,6 +22,7 @@ settings =
 		{
 			"android.permission.INTERNET",
 		},
+		facebookAppId = "844579549077658",
 	},
 
 	--
@@ -32,8 +33,23 @@ settings =
 		xcassets = "Images.xcassets",
 		plist =
 		{
-			UIStatusBarHidden = false,
+			UIStatusBarHidden = true,
 			UILaunchStoryboardName = "LaunchScreen",
+			UIApplicationExitsOnSuspend = false,
+            FacebookAppID = "844579549077658",  -- Replace XXXXXXXXXX with your Facebook App ID
+            CFBundleURLTypes =
+            {
+                { CFBundleURLSchemes = { "fb844579549077658", } }  -- Replace XXXXXXXXXX with your Facebook App ID
+            },
+            -- Whitelist Facebook apps
+            LSApplicationQueriesSchemes =
+            {
+                "fb",  -- Needed for the facebook-v4a.isFacebookAppEnabled() API
+                "fbapi",
+                "fbauth2",
+                "fb-messenger-api",
+                "fbshareextension"
+            },
 		},
 	},
 
@@ -43,19 +59,23 @@ settings =
 	plugins =
 	{
 		["plugin.bit"] =
-      {
-          publisherId = "com.coronalabs",
-          supportedPlatforms = { iphone=true, android=true, }
-      },
-      ["plugin.openssl"] =
-      {
-          publisherId = "com.coronalabs",
-          supportedPlatforms = { iphone=true, android=true, }
-      },
-      ["plugin.gamesparks"] =
-      {
-        publisherId = "com.gamesparks",
-      },
+      	{
+        	publisherId = "com.coronalabs",
+        	supportedPlatforms = { iphone=true, android=true, }
+      	},
+      	["plugin.openssl"] =
+      	{	
+        publisherId = "com.coronalabs",
+        	supportedPlatforms = { iphone=true, android=true, }
+      	},
+      	["plugin.gamesparks"] =
+      	{
+        	publisherId = "com.gamesparks",
+      	},
+	  	["plugin.facebook.v4a"] =
+        {
+            publisherId = "com.coronalabs"
+        },
 	},
 
 	--

@@ -17,11 +17,11 @@ local function handleButtonEvent( event )
         if (event.target.id == "emailpassword") then
             composer.gotoScene( "usernameLoginScene" )
         elseif (event.target.id == "facebook") then
-
+            
         elseif (event.target.id == "google") then
 
         elseif (event.target.id == "back") then
-            composer.gotoScene( composer.getSceneName( "previous" ))
+            composer.gotoScene( "loginOrRegisterScene" )
         end
         print(event.target.id .. " button pressed")
     end

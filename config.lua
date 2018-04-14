@@ -7,17 +7,13 @@ application =
 {
 	content =
 	{
-		width = display.pixelWidth,
-		height = display.pixelHeight, 
-		scale = "letterbox",
+		scale = "adaptive",
 		fps = 60,
 		
-		--[[
 		imageSuffix =
 		{
-			    ["@2x"] = 2,
-			    ["@4x"] = 4,
+			    ["@2x"] = 1.5,
+			    ["@3x"] = 2.5,
 		},
-		--]]
 	},
 }

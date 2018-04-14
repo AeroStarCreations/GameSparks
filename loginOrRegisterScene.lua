@@ -1,5 +1,6 @@
 local composer = require( "composer" )
 local widget = require( "widget" )
+local GS = require( "plugin.gamesparks" )
 
 widget.setTheme( "widget_theme_ios7" )
  
@@ -11,6 +12,8 @@ local scene = composer.newScene()
 -- -----------------------------------------------------------------------------------
 local w = display.actualContentWidth
 local h = display.actualContentHeight
+local gs
+local requestBuilder
 
 local function handleButtonEvent( event ) 
     if (event.phase == "ended") then
@@ -33,6 +36,13 @@ function scene:create( event )
  
     local sceneGroup = self.view
     -- Code here runs when the scene is first created but has not yet appeared on screen
+    gs = createGS()
+    gs.setApiKey( "x351935KVecu" )
+    gs.setApiSecret( "RSMked0zUwwKqS0baxkktSpt9mNoDN1j" )
+    gs.setApiCredential( "device" )
+    gs.connect()
+
+    requestBuilder = gs.getRequestBuilder()
 
 end
  
@@ -84,7 +94,13 @@ function scene:show( event )
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
         -- ex: after the scene transition completes
- 
+        print( "Authenticated: " .. tostring(gs.isAuthenticated()))
+        if (gs.isAuthenticated()) then
+            playerDetails = requestBuilder.createAccountDetailsRequest()
+            playerDetails:send( function(response)
+                print( "Display name: " .. response.data.displayName )
+            end)
+        end
     end
 end
  

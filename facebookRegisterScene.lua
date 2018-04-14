@@ -1,6 +1,7 @@
 local composer = require( "composer" )
 local widget = require( "widget" )
 local GS = require( "plugin.gamesparks" )
+local facebook = require( "plugin.facebook.v4a" )
 
 widget.setTheme( "widget_theme_ios7" )
  
@@ -14,36 +15,22 @@ local w = display.actualContentWidth
 local h = display.actualContentHeight
 local gs
 local requestBuilder
-local loginAuth
-local username
-local password
- 
-local function loginUser() 
-    loginAuth:setUserName( username.text )
-    loginAuth:setPassword( password.text )
-
-    loginAuth:send( function( authenticationResponse )
-        if authenticationResponse:hasErrors() then
-            for key, value in pairs(authenticationResponse:getErrors()) do
-                print(key, value)
-            end
-        else 
-            print( "Aunthentication success!" )
-            print (gs.isAuthenticated() )
-        end 
-    end)
-
-    print("-- loginUser()")
-end
+local registerRequest
+local infoText
+local button1
 
 local function handleButtonEvent( event )
     if (event.phase == "ended") then
-        if (event.target.id == "login") then
-            if (username.text == nil or username.text == "" or
-            password.text == nil or password.text == "") then
-                print( "Must fill all fields" )
-            else 
-                loginUser();
+        if (event.target.id == "register") then
+            if (facebook.isActive) then 
+                if (facebook.getCurrentAccessToken() == nil) then
+                    infoText.text = infoText.text .. "\nRegistration required"
+                    facebook.login()
+                else
+                    infoText.text = infoText.text .. "\nAlready registered"
+                end
+            else
+                infoText.text = infoText.text .. "\nFB not active"
             end
         elseif (event.target.id == "back") then
             composer.gotoScene( composer.getSceneName( "previous" ))
@@ -61,6 +48,38 @@ local function availabilityCallback( isAvailable )
 
     if isAvailable then
     -- Do something
+    end
+end
+
+local function registerWithGameSparks( token )
+    registerRequest:setAccessToken( token )
+    registerRequest:setSwitchIfPossible( true )
+    registerRequest:setSyncDisplayName( true )
+
+    registerRequest:send( function( authenticationResponse)
+         infoText.text = infoText.text .. "\n" .. authenticationResponse
+    end)
+end
+
+local function facebookListener( event )
+    if ( "fbinit" == event.name ) then
+        infoText.text = infoText.text .. "\nFacebook initialized"
+        -- Initialization complete
+        button1.alpha = 1
+        button1:setEnabled( true )
+    elseif ( "fbconnect" == event.name ) then
+        infoText.text = infoText.text .. "\nFacebook connected"
+        if ( "session" == event.type ) then
+            infoText.text = infoText.text .. "\nFacebook session"
+            -- Handle login event
+            if ("login" == event.phase) then
+                infoText.text = infoText.text .. "\nGameSparks login"
+                registerWithGameSparks(event.token)
+            end
+        elseif ( "dialog" == event.type ) then
+            infoText.text = infoText.text .. "\nFacebook dialog"
+            -- Handle dialog event
+        end
     end
 end
 
@@ -83,7 +102,7 @@ function scene:create( event )
     gs.connect()
 
     requestBuilder = gs.getRequestBuilder()
-    loginAuth = requestBuilder.createAuthenticationRequest()
+    registerRequest = requestBuilder.createFacebookConnectRequest()
 
 end
  
@@ -97,49 +116,55 @@ function scene:show( event )
     if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
         -- ex: before the scene transition begins
-        local numOfItems = 4
+        local numOfItems = 3
 
-        username = native.newTextField(w/2, h/(numOfItems+1), w/1.4, h/20)
-        username.placeholder = "(Username)"
-
-        password = native.newTextField(w/2, 2 * username.y, w/1.4, h/20)
-        password.placeholder = "(Password)"
-
-        local button1 = widget.newButton({
-            id = "login",
+        infoText = display.newText({
+            text = "Info Text",
             x = w / 2,
-            y = 3 * username.y,
+            y = h / (numOfItems + 1),
+            width = w,
+            height = 0,
+            align = "center",
+        })
+
+        button1 = widget.newButton({
+            id = "register",
+            x = w / 2,
+            y = 2 * infoText.y,
             width = w/1.4,
-            height = 2 * username.height,
-            label = "Log In",
-            fontSize = username.height,
+            height = w / 4,
+            label = "Register With\nFacebook",
+            labelAlign = "center",
+            fontSize = w / 12,
             shape = "roundedRect",
-            cornerRadius = username.height * 2 / 3,
+            cornerRadius = w / 4 * 2 / 3,
+            isEnabled = false;
             onEvent = handleButtonEvent,
         })
+        button1.alpha = 0.2
 
         local button2 = widget.newButton({
             id = "back",
             x = w / 2,
-            y = 4 * username.y,
-            width = w/1.4,
-            height = button1.height,
+            y = 3 * infoText.y,
+            width = w / 1.4,
+            height = w / 4,
             label = "Back",
-            fontSize = username.height,
+            fontSize = w / 12,
             shape = "roundedRect",
-            cornerRadius = username.height * 2 / 3,
+            cornerRadius = w / 4 * 2 / 3,
             onEvent = handleButtonEvent,
         })
 
-        sceneGroup:insert( username )
-        sceneGroup:insert( password )
+        sceneGroup:insert( infoText )
         sceneGroup:insert( button1 )
         sceneGroup:insert( button2 )
  
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
         -- ex: after the scene transition completes
- 
+        facebook:init( facebookListener )
+
     end
 end
  
@@ -155,9 +180,7 @@ function scene:hide( event )
  
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen
-        username:removeSelf()
-        password:removeSelf()
-
+ 
     end
 end
  
