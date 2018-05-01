@@ -1,8 +1,17 @@
 local composer = require( "composer" )
 local widget = require( "widget" )
+local GS = require( "plugin.gamesparks" )
+local google = require( "plugin.googleSignIn" )
 
 widget.setTheme( "widget_theme_ios7" )
+google.init()
  
+local androidClientID = "635193827138-jkdpehplsn5tjdini920hn7n3fjc3poj.apps.googleusercontent.com"
+local clientID = "635193827138-8q04oidpj9a0rj81bvm8o5fd8caq04cv.apps.googleusercontent.com" -- iOS default
+if (system.getInfo("platform") == "android") then
+    clientID = androidClientID
+end
+
 local scene = composer.newScene()
  
 -- -----------------------------------------------------------------------------------
@@ -11,19 +20,57 @@ local scene = composer.newScene()
 -- -----------------------------------------------------------------------------------
 local w = display.actualContentWidth
 local h = display.actualContentHeight
+local gs
+local requestBuilder
+local registerRequest
+local infoText
+local button1
 
-local function handleButtonEvent( event ) 
+local function handleButtonEvent( event )
     if (event.phase == "ended") then
-        if (event.target.id == "emailpassword") then
-            composer.gotoScene( "usernameRegisterScene" )
-        elseif (event.target.id == "facebook") then
-            composer.gotoScene( "facebookRegisterScene" )
-        elseif (event.target.id == "google") then
-            composer.gotoScene( "googleRegisterScene" )
+        if (event.target.id == "register") then
+            infoUpdate( "Google Register" )
+            google.signIn(clientID, nil, nil, function(e)
+                if(e.isError == true) then
+                    infoUpdate("error")
+                else
+                    infoUpdate("no error")
+                end
+                infoUpdate("google listener")
+            end)
         elseif (event.target.id == "back") then
-            composer.gotoScene( "loginOrRegisterScene" )
+            composer.gotoScene( composer.getSceneName( "previous" ))
         end
         print(event.target.id .. " button pressed")
+    end
+end
+
+local function writeText( string ) 
+    print( string )
+end
+
+local function availabilityCallback( isAvailable ) 
+    writeText( "Availability: " .. tostring(isAvailable) .. "\n")
+
+    if isAvailable then
+    -- Do something
+    end
+end
+
+local function registerWithGameSparks( token )
+    registerRequest:setAccessToken( token )
+    registerRequest:setSwitchIfPossible( true )
+
+    registerRequest:send( function( authenticationResponse)
+         infoText.text = infoText.text .. "\n" .. authenticationResponse
+    end)
+end
+
+local function googleListener( event )
+    infoClear()
+    infoUpdate( "Google Listener" )
+    for k,v in pairs(event) do
+        infoUpdate(k, v)
     end
 end
 
@@ -37,6 +84,16 @@ function scene:create( event )
  
     local sceneGroup = self.view
     -- Code here runs when the scene is first created but has not yet appeared on screen
+    gs = createGS()
+    gs.setLogger( writeText )
+    gs.setApiKey( "x351935KVecu" )
+    gs.setApiSecret( "RSMked0zUwwKqS0baxkktSpt9mNoDN1j" )
+    gs.setApiCredential( "device" )
+    gs.setAvailabilityCallback( availabilityCallback )
+    gs.connect()
+
+    requestBuilder = gs.getRequestBuilder()
+    registerRequest = requestBuilder.createFacebookConnectRequest()
 
 end
  
@@ -50,74 +107,42 @@ function scene:show( event )
     if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
         -- ex: before the scene transition begins
+        local numOfItems = 2
 
-        local numOfButtons = 4
-        local buttonW = w / 2
-        local buttonH = buttonW / 4
-        local buttonFontSize = buttonH / 2
-        local buttonCornerRadius = buttonH / 3
-
-        local button1 = widget.newButton({
-            id = "emailpassword",
+        button1 = widget.newButton({
+            id = "register",
             x = w / 2,
-            y = h / (numOfButtons + 1),
-            width = buttonW,
-            height = buttonH,
-            label = "Email/Password",
-            fontSize = buttonFontSize,
+            y = h / (numOfItems + 1),
+            width = w/1.4,
+            height = w / 4,
+            label = "Register With\nGoogle",
+            labelAlign = "center",
+            fontSize = w / 12,
             shape = "roundedRect",
-            cornerRadius = buttonCornerRadius,
+            cornerRadius = w / 4 * 2 / 3,
             onEvent = handleButtonEvent,
         })
 
         local button2 = widget.newButton({
-            id = "facebook",
-            x = w / 2,
-            y = 2 * button1.y,
-            width = buttonW,
-            height = buttonH,
-            label = "Facebook",
-            fontSize = buttonFontSize,
-            shape = "roundedRect",
-            cornerRadius = buttonCornerRadius,
-            onEvent = handleButtonEvent,
-        })
-
-        local button3 = widget.newButton({
-            id = "google",
-            x = w / 2,
-            y = 3 * button1.y,
-            width = buttonW,
-            height = buttonH,
-            label = "Google",
-            fontSize = buttonFontSize,
-            shape = "roundedRect",
-            cornerRadius = buttonCornerRadius,
-            onEvent = handleButtonEvent,
-        })
-
-        local button4 = widget.newButton({
             id = "back",
             x = w / 2,
-            y = 4 * button1.y,
-            width = buttonW,
-            height = buttonH,
+            y = 2 * button1.y,
+            width = w / 1.4,
+            height = w / 4,
             label = "Back",
-            fontSize = buttonFontSize,
+            fontSize = w / 12,
             shape = "roundedRect",
-            cornerRadius = buttonCornerRadius,
+            cornerRadius = w / 4 * 2 / 3,
             onEvent = handleButtonEvent,
         })
 
         sceneGroup:insert( button1 )
         sceneGroup:insert( button2 )
-        sceneGroup:insert( button3 )
-        sceneGroup:insert( button4 )
  
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
         -- ex: after the scene transition completes
- 
+
     end
 end
  

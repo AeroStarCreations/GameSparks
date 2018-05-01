@@ -98,6 +98,8 @@ function scene:show( event )
         if (gs.isAuthenticated()) then
             playerDetails = requestBuilder.createAccountDetailsRequest()
             playerDetails:send( function(response)
+                infoClear()
+                infoUpdate("Welcome " .. response.data.displayName .. "!")
                 print( "Display name: " .. response.data.displayName )
             end)
         end

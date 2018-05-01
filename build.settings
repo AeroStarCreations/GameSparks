@@ -23,6 +23,7 @@ settings =
 			"android.permission.INTERNET",
 		},
 		facebookAppId = "844579549077658",
+		useGoogleServicesJson = true,
 	},
 
 	--
@@ -36,10 +37,16 @@ settings =
 			UIStatusBarHidden = true,
 			UILaunchStoryboardName = "LaunchScreen",
 			UIApplicationExitsOnSuspend = false,
-            FacebookAppID = "844579549077658",  -- Replace XXXXXXXXXX with your Facebook App ID
+            FacebookAppID = "844579549077658",  
             CFBundleURLTypes =
             {
-                { CFBundleURLSchemes = { "fb844579549077658", } }  -- Replace XXXXXXXXXX with your Facebook App ID
+                { 
+					CFBundleURLSchemes = 
+					{ 
+						"fb844579549077658", 
+						"635193827138-8q04oidpj9a0rj81bvm8o5fd8caq04cv.apps.googleusercontent.com",
+					} 
+				}
             },
             -- Whitelist Facebook apps
             LSApplicationQueriesSchemes =
@@ -75,7 +82,11 @@ settings =
 	  	["plugin.facebook.v4a"] =
         {
             publisherId = "com.coronalabs"
-        },
+		},
+		["plugin.googleSignIn"] = 
+		{
+			publisherId = "tech.scotth"
+		},
 	},
 
 	--

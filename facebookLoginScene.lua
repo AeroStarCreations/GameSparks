@@ -19,9 +19,12 @@ local registerRequest
 local infoText
 local button1
 
+----
+-- Button handler for all buttons in the scene
+----
 local function handleButtonEvent( event )
     if (event.phase == "ended") then
-        if (event.target.id == "register") then
+        if (event.target.id == "login") then
             if (facebook.isActive) then 
                 if (facebook.getCurrentAccessToken() == nil) then
                     infoText.text = infoText.text .. "\nRegistration required"
@@ -43,6 +46,9 @@ local function writeText( string )
     print( string )
 end
 
+----
+-- The GameSparks callback method
+----
 local function availabilityCallback( isAvailable ) 
     writeText( "Availability: " .. tostring(isAvailable) .. "\n")
 
@@ -51,7 +57,10 @@ local function availabilityCallback( isAvailable )
     end
 end
 
-local function registerWithGameSparks( token )
+----
+-- Uses the user's FB auth token to login with GameSparks
+----
+local function loginWithGameSparks( token )
     registerRequest:setAccessToken( token )
     registerRequest:setSwitchIfPossible( true )
 
@@ -60,6 +69,9 @@ local function registerWithGameSparks( token )
     end)
 end
 
+----
+-- Listener set with facebook.init()
+----
 local function facebookListener( event )
     if ( "fbinit" == event.name ) then
         infoText.text = infoText.text .. "\nFacebook initialized"
@@ -73,7 +85,7 @@ local function facebookListener( event )
             -- Handle login event
             if ("login" == event.phase) then
                 infoText.text = infoText.text .. "\nGameSparks login"
-                registerWithGameSparks(event.token)
+                loginWithGameSparks(event.token)
             end
         elseif ( "dialog" == event.type ) then
             infoText.text = infoText.text .. "\nFacebook dialog"
@@ -118,12 +130,12 @@ function scene:show( event )
         local numOfItems = 2
 
         button1 = widget.newButton({
-            id = "register",
+            id = "login",
             x = w / 2,
             y = h / (numOfItems + 1),
             width = w/1.4,
             height = w / 4,
-            label = "Register With\nFacebook",
+            label = "Login With\nFacebook",
             labelAlign = "center",
             fontSize = w / 12,
             shape = "roundedRect",

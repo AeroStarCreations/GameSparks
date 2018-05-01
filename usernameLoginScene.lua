@@ -24,11 +24,16 @@ local function loginUser()
 
     loginAuth:send( function( authenticationResponse )
         if authenticationResponse:hasErrors() then
+            infoClear()
             for key, value in pairs(authenticationResponse:getErrors()) do
                 print(key, value)
+                infoUpdate(key, value)
             end
         else 
-            print( "Aunthentication success!" )
+            infoClear()
+            infoUpdate( "Authentication success!" )
+            infoUpdate( "Welcome "..authenticationResponse.data.displayName.."!")
+            print( "Authentication success!" )
             print (gs.isAuthenticated() )
         end 
     end)
@@ -42,6 +47,8 @@ local function handleButtonEvent( event )
             if (username.text == nil or username.text == "" or
             password.text == nil or password.text == "") then
                 print( "Must fill all fields" )
+                infoClear()
+                infoUpdate( "Must fill all fields" )
             else 
                 loginUser();
             end
@@ -49,6 +56,24 @@ local function handleButtonEvent( event )
             composer.gotoScene( composer.getSceneName( "previous" ))
         end
         print(event.target.id .. " button pressed")
+    end
+end
+
+local function inputListener( event )
+    infoClear()
+    if ("username" == event.target.id) then
+        infoUpdate("username")
+        if ("submitted" == event.phase or "ended" == event.phase) then
+            infoUpdate("username submitted")
+            native.setKeyboardFocus( password )
+        end
+    elseif ("password" == event.target.id) then
+        infoUpdate("password")
+        if ("submitted" == event.phase or "ended" == event.phase) then
+            infoUpdate("password submitted")
+            native.setKeyboardFocus( nil )
+            handleButtonEvent({phase="ended", target={id="login"}})
+        end
     end
 end
 
@@ -101,9 +126,14 @@ function scene:show( event )
 
         username = native.newTextField(w/2, h/(numOfItems+1), w/1.4, h/20)
         username.placeholder = "(Username)"
+        username.id = "username"
+        username:addEventListener( "userInput", inputListener )
 
         password = native.newTextField(w/2, 2 * username.y, w/1.4, h/20)
         password.placeholder = "(Password)"
+        password.id = "password"
+        password.isSecure = true
+        password:addEventListener( "userInput", inputListener )
 
         local button1 = widget.newButton({
             id = "login",
