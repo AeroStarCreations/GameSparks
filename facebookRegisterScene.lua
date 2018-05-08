@@ -13,10 +13,8 @@ local scene = composer.newScene()
 -- -----------------------------------------------------------------------------------
 local w = display.actualContentWidth
 local h = display.actualContentHeight
-local gs
 local requestBuilder
 local registerRequest
-local infoText
 local button1
 
 local function handleButtonEvent( event )
@@ -24,13 +22,13 @@ local function handleButtonEvent( event )
         if (event.target.id == "register") then
             if (facebook.isActive) then 
                 if (facebook.getCurrentAccessToken() == nil) then
-                    infoText.text = infoText.text .. "\nRegistration required"
+                    infoUpdate("Registration required")
                     facebook.login()
                 else
-                    infoText.text = infoText.text .. "\nAlready registered"
+                    infoUpdate("Already registered")
                 end
             else
-                infoText.text = infoText.text .. "\nFB not active"
+                infoUpdate("FB not active")
             end
         elseif (event.target.id == "back") then
             composer.gotoScene( composer.getSceneName( "previous" ))
@@ -39,44 +37,29 @@ local function handleButtonEvent( event )
     end
 end
 
-local function writeText( string ) 
-    print( string )
-end
-
-local function availabilityCallback( isAvailable ) 
-    writeText( "Availability: " .. tostring(isAvailable) .. "\n")
-
-    if isAvailable then
-    -- Do something
-    end
-end
-
 local function registerWithGameSparks( token )
     registerRequest:setAccessToken( token )
-    registerRequest:setSwitchIfPossible( true )
 
-    registerRequest:send( function( authenticationResponse)
-         infoText.text = infoText.text .. "\n" .. authenticationResponse
-    end)
+    registerRequest:send( function( authenticationResponse) end)
 end
 
 local function facebookListener( event )
     if ( "fbinit" == event.name ) then
-        infoText.text = infoText.text .. "\nFacebook initialized"
+        infoUpdate("Facebook initialized")
         -- Initialization complete
         button1.alpha = 1
         button1:setEnabled( true )
     elseif ( "fbconnect" == event.name ) then
-        infoText.text = infoText.text .. "\nFacebook connected"
+        infoUpdate("Facebook connected")
         if ( "session" == event.type ) then
-            infoText.text = infoText.text .. "\nFacebook session"
+            infoUpdate("Facebook session")
             -- Handle login event
             if ("login" == event.phase) then
-                infoText.text = infoText.text .. "\nGameSparks login"
+                infoUpdate("GameSparks login")
                 registerWithGameSparks(event.token)
             end
         elseif ( "dialog" == event.type ) then
-            infoText.text = infoText.text .. "\nFacebook dialog"
+            infoUpdate("Facebook dialog")
             -- Handle dialog event
         end
     end
@@ -92,14 +75,6 @@ function scene:create( event )
  
     local sceneGroup = self.view
     -- Code here runs when the scene is first created but has not yet appeared on screen
-    gs = createGS()
-    gs.setLogger( writeText )
-    gs.setApiKey( "x351935KVecu" )
-    gs.setApiSecret( "RSMked0zUwwKqS0baxkktSpt9mNoDN1j" )
-    gs.setApiCredential( "device" )
-    gs.setAvailabilityCallback( availabilityCallback )
-    gs.connect()
-
     requestBuilder = gs.getRequestBuilder()
     registerRequest = requestBuilder.createFacebookConnectRequest()
 
@@ -152,7 +127,7 @@ function scene:show( event )
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
         -- ex: after the scene transition completes
-        infoText.text = infoText.text .. "\nfacebook initializer"
+        infoUpdate("Facebook initializer")
         facebook.init( facebookListener )
 
     end

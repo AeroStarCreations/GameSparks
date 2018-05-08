@@ -13,17 +13,15 @@ if (system.getInfo("platform") == "android") then
 end
 
 local scene = composer.newScene()
- 
+   
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
 -- -----------------------------------------------------------------------------------
 local w = display.actualContentWidth
 local h = display.actualContentHeight
-local gs
 local requestBuilder
 local registerRequest
-local infoText
 local button1
 
 local function handleButtonEvent( event )
@@ -32,11 +30,11 @@ local function handleButtonEvent( event )
             infoUpdate( "Google Register" )
             google.signIn(clientID, nil, nil, function(e)
                 if(e.isError == true) then
-                    infoUpdate("error")
+                    print("-------error")
                 else
-                    infoUpdate("no error")
+                    print("-------no error")
                 end
-                infoUpdate("google listener")
+                print("-------google listener")
             end)
         elseif (event.target.id == "back") then
             composer.gotoScene( composer.getSceneName( "previous" ))
@@ -45,25 +43,10 @@ local function handleButtonEvent( event )
     end
 end
 
-local function writeText( string ) 
-    print( string )
-end
-
-local function availabilityCallback( isAvailable ) 
-    writeText( "Availability: " .. tostring(isAvailable) .. "\n")
-
-    if isAvailable then
-    -- Do something
-    end
-end
-
 local function registerWithGameSparks( token )
     registerRequest:setAccessToken( token )
-    registerRequest:setSwitchIfPossible( true )
 
-    registerRequest:send( function( authenticationResponse)
-         infoText.text = infoText.text .. "\n" .. authenticationResponse
-    end)
+    registerRequest:send( function( authenticationResponse) end)
 end
 
 local function googleListener( event )
@@ -84,14 +67,6 @@ function scene:create( event )
  
     local sceneGroup = self.view
     -- Code here runs when the scene is first created but has not yet appeared on screen
-    gs = createGS()
-    gs.setLogger( writeText )
-    gs.setApiKey( "x351935KVecu" )
-    gs.setApiSecret( "RSMked0zUwwKqS0baxkktSpt9mNoDN1j" )
-    gs.setApiCredential( "device" )
-    gs.setAvailabilityCallback( availabilityCallback )
-    gs.connect()
-
     requestBuilder = gs.getRequestBuilder()
     registerRequest = requestBuilder.createFacebookConnectRequest()
 

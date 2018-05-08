@@ -1,6 +1,7 @@
 local composer = require( "composer" )
 local widget = require( "widget" )
 local GS = require( "plugin.gamesparks" )
+local g = require ( "globals" )
 
 widget.setTheme( "widget_theme_ios7" )
  
@@ -12,8 +13,9 @@ local scene = composer.newScene()
 -- -----------------------------------------------------------------------------------
 local w = display.actualContentWidth
 local h = display.actualContentHeight
-local gs
 local requestBuilder
+local button1
+local timers = {}
 
 local function handleButtonEvent( event ) 
     if (event.phase == "ended") then
@@ -36,12 +38,6 @@ function scene:create( event )
  
     local sceneGroup = self.view
     -- Code here runs when the scene is first created but has not yet appeared on screen
-    gs = createGS()
-    gs.setApiKey( "x351935KVecu" )
-    gs.setApiSecret( "RSMked0zUwwKqS0baxkktSpt9mNoDN1j" )
-    gs.setApiCredential( "device" )
-    gs.connect()
-
     requestBuilder = gs.getRequestBuilder()
 
 end
@@ -62,7 +58,7 @@ function scene:show( event )
         local buttonFontSize = buttonH / 2
         local buttonCornerRadius = buttonH / 3
 
-        local button1 = widget.newButton({
+        button1 = widget.newButton({
             id = "login",
             x = w / 2,
             y = h / (numOfButtons + 1),
@@ -94,15 +90,31 @@ function scene:show( event )
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
         -- ex: after the scene transition completes
-        print( "Authenticated: " .. tostring(gs.isAuthenticated()))
-        if (gs.isAuthenticated()) then
-            playerDetails = requestBuilder.createAccountDetailsRequest()
-            playerDetails:send( function(response)
-                infoClear()
-                infoUpdate("Welcome " .. response.data.displayName .. "!")
-                print( "Display name: " .. response.data.displayName )
-            end)
+        infoClear()
+        infoUpdate( "not authenticated" )
+        local function checkAuthentication( event )
+            if (gs.isAuthenticated()) then
+                -- Get account information
+                playerDetails = requestBuilder.createAccountDetailsRequest()
+                playerDetails:send( function(response)
+                    infoClear()
+                    local t = "Welcome"
+                    if (response.data.displayName) then
+                        t = t .. " " .. response.data.displayName
+                        print( "Display name: " .. response.data.displayName )
+                    end
+                    infoUpdate( t .. "!" )
+                end)
+                -- Cancel timer
+                timer.cancel( event.source )
+                event.source = nil
+                -- Disable login button (commented for testing)
+                -- button1.alpha = 0.5
+                -- button1:setEnabled( false )
+                print( "Authenticated: true" )
+            end
         end
+        timers.authTimer = timer.performWithDelay( 500, checkAuthentication, -1)
     end
 end
  
@@ -118,7 +130,10 @@ function scene:hide( event )
  
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen
- 
+        for k,v in pairs( timers ) do 
+            timer.cancel( v )
+            v = nil
+        end
     end
 end
  

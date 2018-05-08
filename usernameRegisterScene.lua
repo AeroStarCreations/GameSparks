@@ -12,7 +12,6 @@ local scene = composer.newScene()
 -- -----------------------------------------------------------------------------------
 local w = display.actualContentWidth
 local h = display.actualContentHeight
-local gs
 local requestBuilder
 local registerRequest
 local displayName
@@ -52,18 +51,6 @@ local function handleButtonEvent( event )
     end
 end
 
-local function writeText( string ) 
-    print( string )
-end
-
-local function availabilityCallback( isAvailable ) 
-    writeText( "Availability: " .. tostring(isAvailable) .. "\n")
-
-    if isAvailable then
-    -- Do something
-    end
-end
-
  
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
@@ -74,14 +61,6 @@ function scene:create( event )
  
     local sceneGroup = self.view
     -- Code here runs when the scene is first created but has not yet appeared on screen
-    gs = createGS()
-    gs.setLogger( writeText )
-    gs.setApiKey( "x351935KVecu" )
-    gs.setApiSecret( "RSMked0zUwwKqS0baxkktSpt9mNoDN1j" )
-    gs.setApiCredential( "device" )
-    gs.setAvailabilityCallback( availabilityCallback )
-    gs.connect()
-
     requestBuilder = gs.getRequestBuilder()
     registerRequest = requestBuilder.createRegistrationRequest()
 
