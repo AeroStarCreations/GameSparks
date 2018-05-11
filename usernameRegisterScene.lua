@@ -1,6 +1,7 @@
 local composer = require( "composer" )
 local widget = require( "widget" )
 local GS = require( "plugin.gamesparks" )
+local GGData = require( "GGData" )
 
 widget.setTheme( "widget_theme_ios7" )
  
@@ -12,6 +13,7 @@ local scene = composer.newScene()
 -- -----------------------------------------------------------------------------------
 local w = display.actualContentWidth
 local h = display.actualContentHeight
+local data = GGData:new( "appData" )
 local requestBuilder
 local registerRequest
 local displayName
@@ -25,6 +27,10 @@ local function registerUser()
 
     registerRequest:send( function( authenticationResponse )
         if not authenticationResponse:hasErrors() then
+            data.signInMethod = "email"
+            data.isLoggedIn = true
+            data.authToken = authenticationResponse.authToken
+            data:save()
             print( response:getUserName() " has successfully registered!")
         else
             for key,value in pairs(authenticationResponse:getErrors()) do

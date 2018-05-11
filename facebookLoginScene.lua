@@ -3,6 +3,7 @@ local widget = require( "widget" )
 local GS = require( "plugin.gamesparks" )
 local facebook = require( "plugin.facebook.v4a" )
 local g = require( "globals" )
+local GGData = require( "GGData" )
 
 widget.setTheme( "widget_theme_ios7" )
  
@@ -14,6 +15,7 @@ local scene = composer.newScene()
 -- -----------------------------------------------------------------------------------
 local w = display.actualContentWidth
 local h = display.actualContentHeight
+local data = GGData:new( "appData" )
 local requestBuilder
 local loginRequest
 local button1
@@ -49,6 +51,16 @@ local function loginWithGameSparks( token )
 
     loginRequest:send( function(authenticationResponse) 
         g.printTable( authenticationResponse )
+        if not authenticationResponse:hasErrors() then
+            data.signInMethod = "email"
+            data.isLoggedIn = true
+            data.authToken = authenticationResponse.authToken
+            data:save()
+        else
+            for key,value in pairs(authenticationResponse:getErrors()) do
+                print(key,value)
+            end
+        end
     end)
 end
 

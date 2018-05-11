@@ -1,6 +1,7 @@
 local composer = require( "composer" )
 local widget = require( "widget" )
 local GS = require( "plugin.gamesparks" )
+local GGData = require( "GGData" )
 
 widget.setTheme( "widget_theme_ios7" )
  
@@ -12,6 +13,7 @@ local scene = composer.newScene()
 -- -----------------------------------------------------------------------------------
 local w = display.actualContentWidth
 local h = display.actualContentHeight
+local data = GGData:new( "appData" )
 local requestBuilder
 local loginAuth
 local username
@@ -29,9 +31,13 @@ local function loginUser()
                 infoUpdate(key, value)
             end
         else 
+            data.signInMethod = "email"
+            data.isLoggedIn = true
+            data.authToken = authenticationResponse.authToken
+            data:save()
             infoClear()
             infoUpdate( "Authentication success!" )
-            infoUpdate( "Welcome "..authenticationResponse.data.displayName.."!")
+            infoUpdate( "Welcome " .. authenticationResponse.data.displayName.."!")
             print( "Authentication success!" )
             print (gs.isAuthenticated() )
         end 

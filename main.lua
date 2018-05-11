@@ -7,10 +7,21 @@
 -- Your code here
 local  composer = require("composer")
 local GS = require( "plugin.gamesparks" )
+local GGData = require( "GGData" )
 
 display.setStatusBar( display.HiddenStatusBar )
 
 composer.isDebug = true
+
+----
+-- Local data
+----
+local data = GGData:new( "appData" )
+if not data.isLoggedIn then data.isLoggedIn = false end
+if not data.signInMethod then data.signInMethod = nil end
+if not data.authToken then data.authToken = nil end
+data:save()
+-- signInMethod values: facebook, email, google
 
 ----
 -- Manual debugging
@@ -50,12 +61,25 @@ local function availabilityCallback( isAvailable )
     end
 end
 
+local function authenticatedCallback( playerId )
+    if playerID then
+        print( "Player ID: " .. playerId )
+    end
+end
+
 gs = createGS()
 gs.setLogger( writeText )
 gs.setApiKey( "x351935KVecu" )
 gs.setApiSecret( "RSMked0zUwwKqS0baxkktSpt9mNoDN1j" )
 gs.setApiCredential( "device" )
+gs.setUseLiveServices( false )
 gs.setAvailabilityCallback( availabilityCallback )
+gs.setAuthenticatedCallback( authenticatedCallback )
+-- Check for authToken
+if ( data.isLoggedIn and data.authToken ) then
+    gs.setAuthToken( data.authToken )
+end
+----
 gs.connect()
 
 composer.gotoScene( "loginOrRegisterScene" )

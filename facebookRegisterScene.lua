@@ -2,6 +2,7 @@ local composer = require( "composer" )
 local widget = require( "widget" )
 local GS = require( "plugin.gamesparks" )
 local facebook = require( "plugin.facebook.v4a" )
+local GGData = require( "GGData" )
 
 widget.setTheme( "widget_theme_ios7" )
  
@@ -13,6 +14,7 @@ local scene = composer.newScene()
 -- -----------------------------------------------------------------------------------
 local w = display.actualContentWidth
 local h = display.actualContentHeight
+local data = GGData:new( "appData" )
 local requestBuilder
 local registerRequest
 local button1
@@ -40,7 +42,19 @@ end
 local function registerWithGameSparks( token )
     registerRequest:setAccessToken( token )
 
-    registerRequest:send( function( authenticationResponse) end)
+    registerRequest:send( function( authenticationResponse) 
+        g.printTable( authenticationResponse )
+        if not authenticationResponse:hasErrors() then
+            data.signInMethod = "email"
+            data.isLoggedIn = true
+            data.authToken = authenticationResponse.authToken
+            data:save()
+        else
+            for key,value in pairs(authenticationResponse:getErrors()) do
+                print(key,value)
+            end
+        end
+    end)
 end
 
 local function facebookListener( event )
