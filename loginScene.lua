@@ -19,7 +19,7 @@ local function handleButtonEvent( event )
         elseif (event.target.id == "facebook") then
             composer.gotoScene( "facebookLoginScene" )
         elseif (event.target.id == "google") then
-
+            composer.gotoScene( "googleLoginScene" )
         elseif (event.target.id == "back") then
             composer.gotoScene( "loginOrRegisterScene" )
         end

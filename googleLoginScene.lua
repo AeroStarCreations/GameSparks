@@ -1,12 +1,20 @@
 local composer = require( "composer" )
 local widget = require( "widget" )
 local GS = require( "plugin.gamesparks" )
+local google = require( "plugin.googleSignIn" )
 local GGData = require( "GGData" )
 
 widget.setTheme( "widget_theme_ios7" )
+google.init()
  
+local androidClientID = "635193827138-s6sbs4gqku7hefnhl8u5hn84de88f12u.apps.googleusercontent.com"
+local clientID = "635193827138-8q04oidpj9a0rj81bvm8o5fd8caq04cv.apps.googleusercontent.com" -- iOS default
+if (system.getInfo("platform") == "android") then
+    clientID = androidClientID
+end
+
 local scene = composer.newScene()
- 
+   
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
@@ -16,46 +24,49 @@ local h = display.actualContentHeight
 local data = GGData:new( "appData" )
 local requestBuilder
 local registerRequest
-local displayName
-local username
-local password
- 
-local function registerUser() 
-    registerRequest:setDisplayName( displayName.text )
-    registerRequest:setUserName( username.text )
-    registerRequest:setPassword( password.text )
+local button1
 
-    registerRequest:send( function( authenticationResponse )
+local function handleButtonEvent( event )
+    if (event.phase == "ended") then
+        if (event.target.id == "login") then
+            infoUpdate( "Google Login" )
+            google.signIn(clientID, nil, nil, function(e)
+                if(e.isError == true) then
+                    infoUpdate( "Google error" )
+                else
+                    infoUpdate( "Google success" )
+                end
+            end)
+        elseif (event.target.id == "back") then
+            composer.gotoScene( composer.getSceneName( "previous" ))
+        end
+        print(event.target.id .. " button pressed")
+    end
+end
+
+local function loginWithGameSparks( token )
+    registerRequest:setAccessToken( token )
+
+    registerRequest:send( function( authenticationResponse) 
+        g.printTable( authenticationResponse )
         if not authenticationResponse:hasErrors() then
-            data.signInMethod = "email"
+            data.signInMethod = "google"
             data.isLoggedIn = true
             data.authToken = authenticationResponse.authToken
             data:save()
-            print( response:getUserName() " has successfully registered!")
         else
             for key,value in pairs(authenticationResponse:getErrors()) do
                 print(key,value)
             end
         end
     end)
-
-    print("-- registerUser()")
 end
 
-local function handleButtonEvent( event )
-    if (event.phase == "ended") then
-        if (event.target.id == "register") then
-            if (displayName.text == nil or displayName.text == "" or
-            username.text == nil or username.text == "" or
-            password.text == nil or password.text == "") then
-                print( "Must fill all fields" )
-            else 
-                registerUser();
-            end
-        elseif (event.target.id == "back") then
-            composer.gotoScene( composer.getSceneName( "previous" ))
-        end
-        print(event.target.id .. " button pressed")
+local function googleListener( event )
+    infoClear()
+    infoUpdate( "Google Listener" )
+    for k,v in pairs(event) do
+        infoUpdate(k, v)
     end
 end
 
@@ -70,7 +81,7 @@ function scene:create( event )
     local sceneGroup = self.view
     -- Code here runs when the scene is first created but has not yet appeared on screen
     requestBuilder = gs.getRequestBuilder()
-    registerRequest = requestBuilder.createRegistrationRequest()
+    registerRequest = requestBuilder.createFacebookConnectRequest()
 
 end
  
@@ -84,54 +95,42 @@ function scene:show( event )
     if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
         -- ex: before the scene transition begins
-        local numOfItems = 5
+        local numOfItems = 2
 
-        displayName = native.newTextField(w/2, h/(numOfItems+1), w/1.4, h/20)
-        displayName.placeholder = "(Display Name)"
-
-        username = native.newTextField(w/2, 2 * displayName.y, w/1.4, h/20)
-        username.placeholder = "(Username)"
-
-        password = native.newTextField(w/2, 3 * displayName.y, w/1.4, h/20)
-        password.isSecure = true
-        password.placeholder = "(Password)"
-
-        local button1 = widget.newButton({
-            id = "register",
+        button1 = widget.newButton({
+            id = "login",
             x = w / 2,
-            y = 4 * displayName.y,
+            y = h / (numOfItems + 1),
             width = w/1.4,
-            height = 2 * displayName.height,
-            label = "Register",
-            fontSize = displayName.height,
+            height = w / 4,
+            label = "Log In With\nGoogle",
+            labelAlign = "center",
+            fontSize = w / 12,
             shape = "roundedRect",
-            cornerRadius = displayName.height * 2 / 3 ,
+            cornerRadius = w / 4 * 2 / 3,
             onEvent = handleButtonEvent,
         })
 
         local button2 = widget.newButton({
             id = "back",
             x = w / 2,
-            y = 5 * displayName.y,
-            width = w/1.4,
-            height = button1.height,
+            y = 2 * button1.y,
+            width = w / 1.4,
+            height = w / 4,
             label = "Back",
-            fontSize = username.height,
+            fontSize = w / 12,
             shape = "roundedRect",
-            cornerRadius = username.height * 2 / 3,
+            cornerRadius = w / 4 * 2 / 3,
             onEvent = handleButtonEvent,
         })
 
-        sceneGroup:insert( displayName )
-        sceneGroup:insert( username )
-        sceneGroup:insert( password )
         sceneGroup:insert( button1 )
         sceneGroup:insert( button2 )
  
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
         -- ex: after the scene transition completes
- 
+
     end
 end
  
@@ -147,9 +146,7 @@ function scene:hide( event )
  
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen
-        displayName:removeSelf();
-        username:removeSelf();
-        password:removeSelf();
+ 
     end
 end
  

@@ -7,7 +7,7 @@ local GGData = require( "GGData" )
 widget.setTheme( "widget_theme_ios7" )
 google.init()
  
-local androidClientID = "635193827138-jkdpehplsn5tjdini920hn7n3fjc3poj.apps.googleusercontent.com"
+local androidClientID = "635193827138-s6sbs4gqku7hefnhl8u5hn84de88f12u.apps.googleusercontent.com"
 local clientID = "635193827138-8q04oidpj9a0rj81bvm8o5fd8caq04cv.apps.googleusercontent.com" -- iOS default
 if (system.getInfo("platform") == "android") then
     clientID = androidClientID
@@ -32,11 +32,10 @@ local function handleButtonEvent( event )
             infoUpdate( "Google Register" )
             google.signIn(clientID, nil, nil, function(e)
                 if(e.isError == true) then
-                    print("-------error")
+                    infoUpdate( "Google error" )
                 else
-                    print("-------no error")
+                    infoUpdate( "Google success" )
                 end
-                print("-------google listener")
             end)
         elseif (event.target.id == "back") then
             composer.gotoScene( composer.getSceneName( "previous" ))
@@ -51,7 +50,7 @@ local function registerWithGameSparks( token )
     registerRequest:send( function( authenticationResponse) 
         g.printTable( authenticationResponse )
         if not authenticationResponse:hasErrors() then
-            data.signInMethod = "email"
+            data.signInMethod = "google"
             data.isLoggedIn = true
             data.authToken = authenticationResponse.authToken
             data:save()

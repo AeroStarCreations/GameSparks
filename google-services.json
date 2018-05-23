@@ -1,0 +1,66 @@
+{
+  "project_info": {
+    "project_number": "635193827138",
+    "firebase_url": "https://gamesparks-201704.firebaseio.com",
+    "project_id": "gamesparks-201704",
+    "storage_bucket": "gamesparks-201704.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:635193827138:android:736e82a02989449d",
+        "android_client_info": {
+          "package_name": "com.aerostarcreations.gamesparks"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "635193827138-ouqmba0187bota1db5shhv5avn9n6jmg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aerostarcreations.gamesparks",
+            "certificate_hash": "c2a96300740f6ee463f19ac5ffbdf72ec1107bc8"
+          }
+        },
+        {
+          "client_id": "635193827138-s6sbs4gqku7hefnhl8u5hn84de88f12u.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "635193827138-jkdpehplsn5tjdini920hn7n3fjc3poj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAexn3O-CYshfU-QDIt1VaDbiCkfUef5Kw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "635193827138-s6sbs4gqku7hefnhl8u5hn84de88f12u.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "635193827138-8q04oidpj9a0rj81bvm8o5fd8caq04cv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.aerostarcreations.gamesparks"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

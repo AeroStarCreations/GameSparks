@@ -44,7 +44,7 @@ settings =
 					CFBundleURLSchemes = 
 					{ 
 						"fb844579549077658", 
-						"635193827138-8q04oidpj9a0rj81bvm8o5fd8caq04cv.apps.googleusercontent.com",
+						"com.googleusercontent.apps.635193827138-8q04oidpj9a0rj81bvm8o5fd8caq04cv",
 					} 
 				}
             },

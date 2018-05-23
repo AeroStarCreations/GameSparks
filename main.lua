@@ -75,7 +75,7 @@ gs.setApiCredential( "device" )
 gs.setUseLiveServices( false )
 gs.setAvailabilityCallback( availabilityCallback )
 gs.setAuthenticatedCallback( authenticatedCallback )
--- Check for authToken
+-- Check for authToken (this is needed to persist login)
 if ( data.isLoggedIn and data.authToken ) then
     gs.setAuthToken( data.authToken )
 end
