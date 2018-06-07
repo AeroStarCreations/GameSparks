@@ -2,6 +2,7 @@ local composer = require( "composer" )
 local widget = require( "widget" )
 local GS = require( "plugin.gamesparks" )
 local g = require ( "globals" )
+local GGData = require( "GGData" )
 
 widget.setTheme( "widget_theme_ios7" )
  
@@ -11,24 +12,106 @@ local scene = composer.newScene()
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
 -- -----------------------------------------------------------------------------------
+-- Local Variables
+local data = GGData:new( "appData" )
 local w = display.actualContentWidth
 local h = display.actualContentHeight
 local requestBuilder
 local button1
+local button3
 local timers = {}
+local buttonIsLogin = true
+
+-- Functions
+local loginLogoutHandler
+local logOut
+local switchLogoutButtonToLogin
+local startAuthTimer
 
 local function handleButtonEvent( event ) 
     if (event.phase == "ended") then
         if (event.target.id == "login") then
-            composer.gotoScene( "loginScene" )
+            loginLogoutHandler()
         elseif (event.target.id == "register") then
             composer.gotoScene( "registerScene" )
+        elseif (event.target.id == "data") then
+            composer.gotoScene( "userDataScene" )
         end
         print(event.target.id .. " button pressed")
     end
 end
  
- 
+local function enableUserDataButton()
+    button3:setEnabled( true )
+    button3.alpha = 1
+end
+
+local function disableUserDataButton()
+    button3:setEnabled( false )
+    button3.alpha = 0.5
+end
+
+function loginLogoutHandler()
+    if buttonIsLogin then
+        composer.gotoScene( "loginScene" )
+    else
+        logOut()
+    end
+end
+
+function logOut()
+    local logoutRequest = requestBuilder.createLogEventRequest()
+    logoutRequest:setEventKey( "Log_Out" )
+    logoutRequest:send( function(response)
+        print( "LOGOUT" )
+        g.printTable( response )
+    end)
+    data.isLoggedIn = false
+    data.authToken = 0
+    data:save()
+    switchLogoutButtonToLogin()
+    startAuthTimer()
+end
+
+local function switchLoginButtonToLogout()
+    button1:setLabel( "Log Out" )
+    buttonIsLogin = false
+end
+
+function switchLogoutButtonToLogin()
+    button1:setLabel( "Log In" )
+    buttonIsLogin = true
+end
+  
+local function checkAuthentication( event )
+    if (gs.isAuthenticated()) then
+        -- Get account information
+        playerDetails = requestBuilder.createAccountDetailsRequest()
+        playerDetails:send( function(response)
+            infoClear()
+            local t = "Welcome"
+            if (response.data.displayName) then
+                t = t .. " " .. response.data.displayName
+                print( "Display name: " .. response.data.displayName )
+            end
+            infoUpdate( t .. "!" )
+        end)
+        switchLoginButtonToLogout()
+        enableUserDataButton()
+        -- Cancel timer
+        timer.cancel( event.source )
+        event.source = nil
+        print( "Authenticated: true" )
+    end
+end
+
+function startAuthTimer()
+    infoClear()
+    infoUpdate( "not authenticated" )
+    timers.authTimer = timer.performWithDelay( 1000, checkAuthentication, -1)
+end
+
+
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
 -- -----------------------------------------------------------------------------------
@@ -52,7 +135,7 @@ function scene:show( event )
     if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
         -- ex: before the scene transition begins
-        local numOfButtons = 2
+        local numOfButtons = 3
         local buttonW = w / 2
         local buttonH = buttonW / 4
         local buttonFontSize = buttonH / 2
@@ -84,37 +167,28 @@ function scene:show( event )
             onEvent = handleButtonEvent,
         })
 
+        button3 = widget.newButton({
+            id = "data",
+            x = w / 2,
+            y = 3 * button1.y,
+            width = buttonW,
+            height = buttonH,
+            label = "User Data",
+            fontSize = buttonFontSize,
+            shape = "roundedRect",
+            cornerRadius = buttonCornerRadius,
+            onEvent = handleButtonEvent,
+        })
+        disableUserDataButton()
+
         sceneGroup:insert( button1 )
         sceneGroup:insert( button2 )
+        sceneGroup:insert( button3 )
 
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
         -- ex: after the scene transition completes
-        infoClear()
-        infoUpdate( "not authenticated" )
-        local function checkAuthentication( event )
-            if (gs.isAuthenticated()) then
-                -- Get account information
-                playerDetails = requestBuilder.createAccountDetailsRequest()
-                playerDetails:send( function(response)
-                    infoClear()
-                    local t = "Welcome"
-                    if (response.data.displayName) then
-                        t = t .. " " .. response.data.displayName
-                        print( "Display name: " .. response.data.displayName )
-                    end
-                    infoUpdate( t .. "!" )
-                end)
-                -- Cancel timer
-                timer.cancel( event.source )
-                event.source = nil
-                -- Disable login button (commented for testing)
-                -- button1.alpha = 0.5
-                -- button1:setEnabled( false )
-                print( "Authenticated: true" )
-            end
-        end
-        timers.authTimer = timer.performWithDelay( 500, checkAuthentication, -1)
+        startAuthTimer()
     end
 end
  
